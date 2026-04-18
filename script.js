@@ -11,12 +11,12 @@ const gifStages = [
 
 const noMessages = [
     "No",
-    "Are you sure?",
+    "pleaaseee",
     "pakkaaa?",
     "inkosari alochinchu",
     "place nee istam bakery aina okayy :)",
-    "pleaaseee",
-    "nen malli adga mari",
+    "ok anu :(",
+    "nen malli adga mari nee istam",
     "Last chance.",
     "You still cannot catch me."
 ]
@@ -39,6 +39,7 @@ const yesBtn = document.getElementById('yes-btn')
 const noBtn = document.getElementById('no-btn')
 const music = document.getElementById('bg-music')
 const musicToggle = document.getElementById('music-toggle')
+const MUSIC_START_DELAY_MS = 12000
 
 function updateMusicIcon() {
     musicToggle.textContent = musicPlaying ? '🔊' : '🔇'
@@ -61,27 +62,29 @@ async function tryStartMusic() {
 }
 
 music.volume = 0.3
-tryStartMusic().then((started) => {
-    if (started) {
-        return
-    }
+setTimeout(() => {
+    tryStartMusic().then((started) => {
+        if (started) {
+            return
+        }
 
-    // Fallback: attempt playback on first user interaction.
-    const resume = () => {
-        music.muted = false
-        music.play().then(() => {
-            musicPlaying = true
-            updateMusicIcon()
-        }).catch(() => {
-            musicPlaying = false
-            updateMusicIcon()
-        })
-    }
+        // Fallback: attempt playback on first user interaction.
+        const resume = () => {
+            music.muted = false
+            music.play().then(() => {
+                musicPlaying = true
+                updateMusicIcon()
+            }).catch(() => {
+                musicPlaying = false
+                updateMusicIcon()
+            })
+        }
 
-    document.addEventListener('click', resume, { once: true })
-    document.addEventListener('touchstart', resume, { once: true, passive: true })
-    document.addEventListener('keydown', resume, { once: true })
-})
+        document.addEventListener('click', resume, { once: true })
+        document.addEventListener('touchstart', resume, { once: true, passive: true })
+        document.addEventListener('keydown', resume, { once: true })
+    })
+}, MUSIC_START_DELAY_MS)
 
 window.addEventListener('pageshow', () => {
     if (!musicPlaying) {

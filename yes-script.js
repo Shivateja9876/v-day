@@ -1,4 +1,5 @@
 let musicPlaying = false
+const MUSIC_START_DELAY_MS = 12000
 
 window.addEventListener('load', () => {
     launchConfetti()
@@ -27,26 +28,28 @@ window.addEventListener('load', () => {
         }
     }
 
-    tryStartMusic().then((started) => {
-        if (started) {
-            return
-        }
+    setTimeout(() => {
+        tryStartMusic().then((started) => {
+            if (started) {
+                return
+            }
 
-        const resume = () => {
-            music.muted = false
-            music.play().then(() => {
-                musicPlaying = true
-                updateMusicIcon()
-            }).catch(() => {
-                musicPlaying = false
-                updateMusicIcon()
-            })
-        }
+            const resume = () => {
+                music.muted = false
+                music.play().then(() => {
+                    musicPlaying = true
+                    updateMusicIcon()
+                }).catch(() => {
+                    musicPlaying = false
+                    updateMusicIcon()
+                })
+            }
 
-        document.addEventListener('click', resume, { once: true })
-        document.addEventListener('touchstart', resume, { once: true, passive: true })
-        document.addEventListener('keydown', resume, { once: true })
-    })
+            document.addEventListener('click', resume, { once: true })
+            document.addEventListener('touchstart', resume, { once: true, passive: true })
+            document.addEventListener('keydown', resume, { once: true })
+        })
+    }, MUSIC_START_DELAY_MS)
 
     window.toggleMusic = function toggleMusic() {
         if (musicPlaying) {
