@@ -10,7 +10,6 @@ const gifStages = [
 ]
 
 const noMessages = [
-    "No",
     "pleaaseee",
     "pakkaaa?",
     "inkosari alochinchu",
@@ -45,8 +44,22 @@ function updateMusicIcon() {
 }
 
 async function tryStartMusic() {
+    const seekToOffset = () => {
+        try {
+            music.currentTime = MUSIC_START_OFFSET_SECONDS
+        } catch {
+            // Ignore seek errors and continue from current position.
+        }
+    }
+
     try {
         // Start muted first to satisfy autoplay rules, then unmute.
+        if (music.readyState >= 1) {
+            seekToOffset()
+        } else {
+            music.addEventListener('loadedmetadata', seekToOffset, { once: true })
+        }
+
         music.muted = true
         await music.play()
         music.muted = false
@@ -65,36 +78,33 @@ music.preload = 'auto'
 music.load()
 updateMusicIcon()
 
-function startMusicFromNoClick() {
-    if (interactionTriggeredMusicStart) {
+tryStartMusic().then((started) => {
+    if (started) {
+        interactionTriggeredMusicStart = true
         return
     }
 
-    interactionTriggeredMusicStart = true
-
-    const seekToOffset = () => {
-        try {
-            music.currentTime = MUSIC_START_OFFSET_SECONDS
-        } catch {
-            // Ignore seek errors and continue playback from available position.
+    const resume = () => {
+        if (interactionTriggeredMusicStart) {
+            return
         }
+
+        interactionTriggeredMusicStart = true
+        music.muted = false
+        music.play().then(() => {
+            musicPlaying = true
+            updateMusicIcon()
+        }).catch(() => {
+            musicPlaying = false
+            interactionTriggeredMusicStart = false
+            updateMusicIcon()
+        })
     }
 
-    if (music.readyState >= 1) {
-        seekToOffset()
-    } else {
-        music.addEventListener('loadedmetadata', seekToOffset, { once: true })
-    }
-
-    music.muted = false
-    music.play().then(() => {
-        musicPlaying = true
-        updateMusicIcon()
-    }).catch(() => {
-        musicPlaying = false
-        updateMusicIcon()
-    })
-}
+    document.addEventListener('click', resume, { once: true })
+    document.addEventListener('touchstart', resume, { once: true, passive: true })
+    document.addEventListener('keydown', resume, { once: true })
+})
 
 function toggleMusic() {
     if (musicPlaying) {
@@ -114,8 +124,6 @@ function toggleMusic() {
 }
 
 function handleYesClick() {
-    startMusicFromNoClick()
-
     if (!runawayEnabled) {
         // Tease her to try No first
         const msg = yesTeasePokes[Math.min(yesTeasedCount, yesTeasePokes.length - 1)]
@@ -135,8 +143,12 @@ function showTeaseMessage(msg) {
 }
 
 function handleNoClick() {
+    if (runawayEnabled) {
+        runAway()
+        return
+    }
+
     noClickCount++
-    startMusicFromNoClick()
 
     // Cycle through guilt-trip messages
     const msgIndex = Math.min(noClickCount - 1, noMessages.length - 1)
@@ -163,6 +175,7 @@ function handleNoClick() {
     if (noClickCount >= noMessages.length && !runawayEnabled) {
         enableRunaway()
         runawayEnabled = true
+        runAway()
     }
 }
 
@@ -177,6 +190,7 @@ function swapGif(src) {
 function enableRunaway() {
     noBtn.addEventListener('mouseover', runAway)
     noBtn.addEventListener('touchstart', runAway, { passive: true })
+    noBtn.addEventListener('click', runAway)
 }
 
 function runAway() {
