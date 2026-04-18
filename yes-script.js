@@ -3,12 +3,67 @@ let musicPlaying = false
 window.addEventListener('load', () => {
     launchConfetti()
 
-    // Autoplay music (works since user clicked Yes to get here)
     const music = document.getElementById('bg-music')
     music.volume = 0.3
-    music.play().catch(() => {})
-    musicPlaying = true
-    document.getElementById('music-toggle').textContent = '🔊'
+
+    const musicToggle = document.getElementById('music-toggle')
+
+    function updateMusicIcon() {
+        musicToggle.textContent = musicPlaying ? '🔊' : '🔇'
+    }
+
+    async function tryStartMusic() {
+        try {
+            music.muted = true
+            await music.play()
+            music.muted = false
+            musicPlaying = true
+            updateMusicIcon()
+            return true
+        } catch {
+            musicPlaying = false
+            updateMusicIcon()
+            return false
+        }
+    }
+
+    tryStartMusic().then((started) => {
+        if (started) {
+            return
+        }
+
+        const resume = () => {
+            music.muted = false
+            music.play().then(() => {
+                musicPlaying = true
+                updateMusicIcon()
+            }).catch(() => {
+                musicPlaying = false
+                updateMusicIcon()
+            })
+        }
+
+        document.addEventListener('click', resume, { once: true })
+        document.addEventListener('touchstart', resume, { once: true, passive: true })
+        document.addEventListener('keydown', resume, { once: true })
+    })
+
+    window.toggleMusic = function toggleMusic() {
+        if (musicPlaying) {
+            music.pause()
+            musicPlaying = false
+            updateMusicIcon()
+        } else {
+            music.muted = false
+            music.play().then(() => {
+                musicPlaying = true
+                updateMusicIcon()
+            }).catch(() => {
+                musicPlaying = false
+                updateMusicIcon()
+            })
+        }
+    }
 })
 
 function launchConfetti() {
@@ -49,15 +104,3 @@ function launchConfetti() {
     }, 300)
 }
 
-function toggleMusic() {
-    const music = document.getElementById('bg-music')
-    if (musicPlaying) {
-        music.pause()
-        musicPlaying = false
-        document.getElementById('music-toggle').textContent = '🔇'
-    } else {
-        music.play()
-        musicPlaying = true
-        document.getElementById('music-toggle').textContent = '🔊'
-    }
-}

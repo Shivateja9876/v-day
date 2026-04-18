@@ -12,11 +12,11 @@ const gifStages = [
 const noMessages = [
     "No",
     "Are you sure?",
-    "Come on, just one plan next month?",
-    "I promise it will be fun.",
-    "Coffee? Lunch? Anything you pick.",
-    "Give me one chance.",
-    "I will stop asking after this.",
+    "pakkaaa?",
+    "inkosari alochinchu",
+    "place nee istam bakery aina okayy :)",
+    "pleaaseee",
+    "nen malli adga mari",
     "Last chance.",
     "You still cannot catch me."
 ]
@@ -32,36 +32,77 @@ let yesTeasedCount = 0
 
 let noClickCount = 0
 let runawayEnabled = false
-let musicPlaying = true
+let musicPlaying = false
 
 const catGif = document.getElementById('cat-gif')
 const yesBtn = document.getElementById('yes-btn')
 const noBtn = document.getElementById('no-btn')
 const music = document.getElementById('bg-music')
+const musicToggle = document.getElementById('music-toggle')
 
-// Autoplay: audio starts muted (bypasses browser policy), unmute immediately
-music.muted = true
-music.volume = 0.3
-music.play().then(() => {
-    music.muted = false
-}).catch(() => {
-    // Fallback: unmute on first interaction
-    document.addEventListener('click', () => {
+function updateMusicIcon() {
+    musicToggle.textContent = musicPlaying ? '🔊' : '🔇'
+}
+
+async function tryStartMusic() {
+    try {
+        // Start muted first to satisfy autoplay rules, then unmute.
+        music.muted = true
+        await music.play()
         music.muted = false
-        music.play().catch(() => {})
-    }, { once: true })
+        musicPlaying = true
+        updateMusicIcon()
+        return true
+    } catch {
+        musicPlaying = false
+        updateMusicIcon()
+        return false
+    }
+}
+
+music.volume = 0.3
+tryStartMusic().then((started) => {
+    if (started) {
+        return
+    }
+
+    // Fallback: attempt playback on first user interaction.
+    const resume = () => {
+        music.muted = false
+        music.play().then(() => {
+            musicPlaying = true
+            updateMusicIcon()
+        }).catch(() => {
+            musicPlaying = false
+            updateMusicIcon()
+        })
+    }
+
+    document.addEventListener('click', resume, { once: true })
+    document.addEventListener('touchstart', resume, { once: true, passive: true })
+    document.addEventListener('keydown', resume, { once: true })
+})
+
+window.addEventListener('pageshow', () => {
+    if (!musicPlaying) {
+        tryStartMusic()
+    }
 })
 
 function toggleMusic() {
     if (musicPlaying) {
         music.pause()
         musicPlaying = false
-        document.getElementById('music-toggle').textContent = '🔇'
+        updateMusicIcon()
     } else {
         music.muted = false
-        music.play()
-        musicPlaying = true
-        document.getElementById('music-toggle').textContent = '🔊'
+        music.play().then(() => {
+            musicPlaying = true
+            updateMusicIcon()
+        }).catch(() => {
+            musicPlaying = false
+            updateMusicIcon()
+        })
     }
 }
 
