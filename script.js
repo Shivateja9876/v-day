@@ -16,16 +16,14 @@ const noMessages = [
     "inkosari alochinchu",
     "place nee istam bakery aina okayy :)",
     "ok anu :(",
-    "nen malli adga mari nee istam",
-    "Last chance.",
-    "You still cannot catch me."
+    "nen malli adga mari nee istam"
 ]
 
 const yesTeasePokes = [
-    "Try saying no first. I dare you.",
-    "Go on, hit no once.",
-    "You are missing the fun part.",
-    "Click no. Just once."
+    "Adenti first no anali ga nuvvu",
+    "intha fast ga ok anave ",
+    "parled oksari no anu",
+    "abba no ani choodo."
 ]
 
 let yesTeasedCount = 0
@@ -33,13 +31,14 @@ let yesTeasedCount = 0
 let noClickCount = 0
 let runawayEnabled = false
 let musicPlaying = false
+let interactionTriggeredMusicStart = false
+const MUSIC_START_OFFSET_SECONDS = 15
 
 const catGif = document.getElementById('cat-gif')
 const yesBtn = document.getElementById('yes-btn')
 const noBtn = document.getElementById('no-btn')
 const music = document.getElementById('bg-music')
 const musicToggle = document.getElementById('music-toggle')
-const MUSIC_START_DELAY_MS = 12000
 
 function updateMusicIcon() {
     musicToggle.textContent = musicPlaying ? '🔊' : '🔇'
@@ -62,35 +61,38 @@ async function tryStartMusic() {
 }
 
 music.volume = 0.3
-setTimeout(() => {
-    tryStartMusic().then((started) => {
-        if (started) {
-            return
-        }
+updateMusicIcon()
 
-        // Fallback: attempt playback on first user interaction.
-        const resume = () => {
-            music.muted = false
-            music.play().then(() => {
-                musicPlaying = true
-                updateMusicIcon()
-            }).catch(() => {
-                musicPlaying = false
-                updateMusicIcon()
-            })
-        }
-
-        document.addEventListener('click', resume, { once: true })
-        document.addEventListener('touchstart', resume, { once: true, passive: true })
-        document.addEventListener('keydown', resume, { once: true })
-    })
-}, MUSIC_START_DELAY_MS)
-
-window.addEventListener('pageshow', () => {
-    if (!musicPlaying) {
-        tryStartMusic()
+function startMusicFromNoClick() {
+    if (interactionTriggeredMusicStart) {
+        return
     }
-})
+
+    interactionTriggeredMusicStart = true
+
+    const seekToOffset = () => {
+        try {
+            music.currentTime = MUSIC_START_OFFSET_SECONDS
+        } catch {
+            // Ignore seek errors and continue playback from available position.
+        }
+    }
+
+    if (music.readyState >= 1) {
+        seekToOffset()
+    } else {
+        music.addEventListener('loadedmetadata', seekToOffset, { once: true })
+    }
+
+    music.muted = false
+    music.play().then(() => {
+        musicPlaying = true
+        updateMusicIcon()
+    }).catch(() => {
+        musicPlaying = false
+        updateMusicIcon()
+    })
+}
 
 function toggleMusic() {
     if (musicPlaying) {
@@ -110,6 +112,8 @@ function toggleMusic() {
 }
 
 function handleYesClick() {
+    startMusicFromNoClick()
+
     if (!runawayEnabled) {
         // Tease her to try No first
         const msg = yesTeasePokes[Math.min(yesTeasedCount, yesTeasePokes.length - 1)]
@@ -130,9 +134,10 @@ function showTeaseMessage(msg) {
 
 function handleNoClick() {
     noClickCount++
+    startMusicFromNoClick()
 
     // Cycle through guilt-trip messages
-    const msgIndex = Math.min(noClickCount, noMessages.length - 1)
+    const msgIndex = Math.min(noClickCount - 1, noMessages.length - 1)
     noBtn.textContent = noMessages[msgIndex]
 
     // Grow the Yes button bigger each time
@@ -152,8 +157,8 @@ function handleNoClick() {
     const gifIndex = Math.min(noClickCount, gifStages.length - 1)
     swapGif(gifStages[gifIndex])
 
-    // Runaway starts at click 5
-    if (noClickCount >= 5 && !runawayEnabled) {
+    // Runaway starts from the final message stage.
+    if (noClickCount >= noMessages.length && !runawayEnabled) {
         enableRunaway()
         runawayEnabled = true
     }
