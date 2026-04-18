@@ -55,6 +55,7 @@ body {
     z-index: 1;
     text-align: center;
     padding: 40px 20px;
+    width: min(100%, 860px);
 }
 
 h1 {
@@ -92,6 +93,7 @@ h1 {
     align-items: center;
     margin-top: 30px;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 #yes-btn {
@@ -107,6 +109,8 @@ h1 {
     transition: transform 0.15s, box-shadow 0.15s;
     box-shadow: 0 6px 20px rgba(76, 175, 80, 0.45);
     letter-spacing: 1px;
+    max-width: min(90vw, 520px);
+    text-wrap: balance;
 }
 
 #yes-btn:hover {
@@ -203,4 +207,111 @@ h1 {
 .yes-container #cat-gif {
     width: 260px;
     height: 260px;
+}
+
+@media (max-width: 768px) {
+    body {
+        align-items: center;
+        padding: 20px 14px 80px;
+    }
+
+    .container {
+        padding: 24px 12px;
+    }
+
+    h1 {
+        font-size: 1.95rem;
+        line-height: 1.2;
+        margin-bottom: 14px;
+    }
+
+    #cat-gif,
+    .yes-container #cat-gif {
+        width: 190px;
+        height: 190px;
+    }
+
+    .buttons {
+        gap: 14px;
+        margin-top: 22px;
+    }
+
+    #yes-btn {
+        font-size: 1.25rem;
+        padding: 14px 28px;
+    }
+
+    #no-btn {
+        font-size: 0.95rem;
+        padding: 10px 20px;
+    }
+
+    .yes-container h1.yes-title {
+        font-size: 2.2rem;
+    }
+
+    .yes-message {
+        font-size: 1.15rem;
+        margin-top: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 14px 10px 86px;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+    }
+
+    #cat-gif,
+    .yes-container #cat-gif {
+        width: 165px;
+        height: 165px;
+    }
+
+    .buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #yes-btn,
+    #no-btn {
+        width: min(88vw, 320px);
+    }
+
+    #yes-btn {
+        font-size: 1.08rem;
+        padding: 12px 18px;
+        border-radius: 14px;
+    }
+
+    #no-btn {
+        font-size: 0.9rem;
+        padding: 10px 14px;
+    }
+
+    #tease-toast {
+        font-size: 0.9rem;
+        min-height: 2.2rem;
+        margin-top: 10px;
+    }
+
+    #music-toggle {
+        width: 46px;
+        height: 46px;
+        font-size: 1.2rem;
+        bottom: 14px;
+        right: 14px;
+    }
+
+    .yes-container h1.yes-title {
+        font-size: 1.8rem;
+    }
+
+    .yes-message {
+        font-size: 1.02rem;
+        margin-top: 14px;
+    }
 }
