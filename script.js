@@ -16,6 +16,7 @@ const noMessages = [
     "inkosari alochinchu",
     "place nee istam bakery aina okayy :)",
     "ok anu :(",
+    "inka okasari alochinchu please",
     "nen malli adga mari nee istam"
 ]
 
@@ -61,6 +62,8 @@ async function tryStartMusic() {
 }
 
 music.volume = 0.3
+music.preload = 'auto'
+music.load()
 updateMusicIcon()
 
 function startMusicFromNoClick() {
