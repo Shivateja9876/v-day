@@ -16,7 +16,6 @@ const noMessages = [
     "inkosari alochinchu",
     "place nee istam bakery aina okayy :)",
     "ok anu :(",
-    "inka okasari alochinchu please",
     "nen malli adga mari nee istam"
 ]
 
